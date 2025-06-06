@@ -40,14 +40,18 @@ register_runner() {
   echo "Stopping runner..."
   supervisorctl stop runner || true
 
+  # Remove the runner through config.sh
+  echo "Removing runner..."
+  ./config.sh remove
+
   # Forcefully remove old configuration
-  if [ -f .runner ]; then
+  if [ -f .runner ] || [ -d "$RUNNER_WORK_DIRECTORY" ]; then
     echo "Forcefully removing old runner configuration"
     rm -f .env
     rm -f .runner
     rm -f .credentials
     rm -f .credentials_rsaparams
-    rm -rf _diag $RUNNER_WORK_DIRECTORY
+    rm -rf _diag "$RUNNER_WORK_DIRECTORY"
   fi
 
   # Register with new token
@@ -68,7 +72,6 @@ register_runner() {
   fi
 
   echo "Registering new runner..."
-  ./config.sh remove
   ./config.sh \
     --url "$RUNNER_URL" \
     --token "$RUNNER_TOKEN" \
